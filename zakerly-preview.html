@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ذاكرلي — معاينة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#14213D;
+    --navy-light:#1F3159;
+    --gold:#E3A008;
+    --gold-dark:#B87F04;
+    --teal:#2A9D8F;
+    --paper:#FFFDF8;
+    --ink:#1B1B1B;
+    --muted:#6B6558;
+    --border:#E7E1D3;
+    --danger:#C2452D;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Tajawal',sans-serif;
+    background:var(--navy);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  .shell{
+    max-width:560px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--navy);
+    display:flex;
+    flex-direction:column;
+  }
+  header{
+    padding:28px 20px 40px;
+    text-align:center;
+    color:#fff;
+  }
+  header h1{
+    font-size:32px;
+    font-weight:900;
+    margin:0 0 6px;
+    letter-spacing:0.5px;
+  }
+  header p{
+    margin:0;
+    color:#B9C2D6;
+    font-size:14px;
+    font-weight:500;
+  }
+  .demo-tag{
+    display:inline-block;
+    margin-top:14px;
+    background:rgba(227,160,8,0.15);
+    border:1px solid rgba(227,160,8,0.4);
+    color:var(--gold);
+    font-size:12px;
+    font-weight:700;
+    padding:5px 14px;
+    border-radius:20px;
+  }
+  main{
+    background:var(--paper);
+    border-radius:28px 28px 0 0;
+    flex:1;
+    padding:26px 20px 60px;
+    box-shadow:0 -8px 30px rgba(0,0,0,0.25);
+  }
+  .ocr-row{margin-bottom:10px;}
+  .ocr-btn{
+    width:100%;
+    background:#fff;
+    border:1.5px dashed var(--gold);
+    color:var(--gold-dark);
+    padding:13px;
+    border-radius:14px;
+    font-family:'Tajawal',sans-serif;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:background .15s ease;
+  }
+  .ocr-btn:hover{background:#FDF6E3;}
+  .ocr-btn:disabled{opacity:0.6;cursor:default;}
+  .ocr-status{
+    display:flex;align-items:center;gap:8px;
+    font-size:13px;color:var(--muted);
+    margin:8px 2px 0;
+  }
+  .ocr-spinner{
+    width:14px;height:14px;
+    border:2px solid var(--border);
+    border-top-color:var(--gold);
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+  }
+  .ocr-preview{
+    margin-top:10px;
+    border-radius:12px;
+    overflow:hidden;
+    max-height:140px;
+    border:1.5px solid var(--border);
+  }
+  .ocr-preview img{width:100%;display:block;object-fit:cover;max-height:140px;}
+
+  .field-label{
+    font-size:14px;
+    font-weight:700;
+    color:var(--navy);
+    margin:0 0 10px;
+    display:block;
+  }
+  textarea{
+    width:100%;
+    min-height:140px;
+    border:1.5px solid var(--border);
+    border-radius:16px;
+    padding:14px;
+    font-family:'Tajawal',sans-serif;
+    font-size:15px;
+    line-height:1.7;
+    resize:vertical;
+    background:#fff;
+    color:var(--ink);
+  }
+  textarea:focus{
+    outline:none;
+    border-color:var(--gold);
+  }
+  .char-count{
+    text-align:left;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:6px;
+  }
+  .char-count.limit{color:var(--danger);font-weight:700;}
+  .section{margin-bottom:22px;}
+  .pill-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .pill{
+    border:1.5px solid var(--border);
+    background:#fff;
+    color:var(--navy);
+    padding:9px 16px;
+    border-radius:999px;
+    font-family:'Tajawal',sans-serif;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .pill:hover{border-color:var(--gold);}
+  .pill.active{
+    background:var(--navy);
+    border-color:var(--navy);
+    color:#fff;
+  }
+  .actions{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:26px;
+  }
+  .action-btn{
+    width:100%;
+    padding:16px;
+    border-radius:16px;
+    border:none;
+    font-family:'Tajawal',sans-serif;
+    font-size:16px;
+    font-weight:800;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    transition:transform .12s ease, opacity .12s ease;
+  }
+  .action-btn:active{transform:scale(0.98);}
+  .action-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+  .btn-summary{background:var(--navy);color:#fff;}
+  .btn-questions{background:var(--gold);color:var(--navy);}
+  .btn-flashcards{background:var(--teal);color:#fff;}
+  .icon{font-size:18px;}
+
+  .result-area{margin-top:30px;}
+  .result-card{
+    background:#fff;
+    border:1.5px solid var(--border);
+    border-radius:20px;
+    padding:20px;
+    margin-bottom:16px;
+  }
+  .result-title{
+    font-size:13px;
+    font-weight:700;
+    color:var(--gold-dark);
+    margin:0 0 12px;
+  }
+  .summary-text{
+    font-size:15.5px;
+    line-height:2;
+    color:var(--ink);
+    margin:0;
+  }
+  .q-item{margin-bottom:22px;}
+  .q-item:last-child{margin-bottom:0;}
+  .q-text{
+    font-size:15px;
+    font-weight:700;
+    color:var(--navy);
+    margin:0 0 12px;
+  }
+  .q-options{display:flex;flex-direction:column;gap:8px;}
+  .q-option{
+    border:1.5px solid var(--border);
+    border-radius:12px;
+    padding:11px 14px;
+    font-size:14px;
+    font-weight:500;
+    background:#fff;
+    cursor:pointer;
+    text-align:right;
+  }
+  .q-option:hover{border-color:var(--gold);}
+  .q-option.correct{background:#EAF6EE;border-color:var(--teal);color:#1D6B5F;font-weight:700;}
+  .q-option.wrong{background:#FBEAE6;border-color:var(--danger);color:var(--danger);font-weight:700;}
+  .q-option.disabled{cursor:default;}
+
+  .flash-grid{display:flex;flex-direction:column;gap:14px;}
+  .flash-card{
+    perspective:1000px;
+    height:130px;
+    cursor:pointer;
+  }
+  .flash-inner{
+    position:relative;
+    width:100%;height:100%;
+    transition:transform .5s;
+    transform-style:preserve-3d;
+  }
+  .flash-card.flipped .flash-inner{transform:rotateY(180deg);}
+  .flash-face{
+    position:absolute;inset:0;
+    backface-visibility:hidden;
+    border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:16px;
+    font-weight:700;font-size:15px;
+    line-height:1.6;
+  }
+  .flash-front{background:var(--navy);color:#fff;}
+  .flash-back{background:var(--teal);color:#fff;transform:rotateY(180deg);font-weight:500;}
+  .flash-hint{
+    position:absolute;bottom:8px;right:0;left:0;
+    font-size:10px;font-weight:500;opacity:0.7;
+  }
+
+  .loading{
+    display:flex;flex-direction:column;align-items:center;
+    padding:40px 0;gap:14px;
+  }
+  .spinner{
+    width:34px;height:34px;
+    border:3px solid var(--border);
+    border-top-color:var(--gold);
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading p{color:var(--muted);font-size:14px;margin:0;}
+
+  .error-banner{
+    background:#FBEAE6;
+    border:1.5px solid var(--danger);
+    color:var(--danger);
+    padding:14px 16px;
+    border-radius:14px;
+    font-size:14px;
+    font-weight:600;
+    text-align:center;
+    margin-top:16px;
+  }
+  .usage-note{
+    text-align:center;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:18px;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header>
+    <h1>ذاكرلي</h1>
+    <p>مساعدك في المذاكرة بالذكاء الاصطناعي</p>
+    <span class="demo-tag">معاينة تجريبية — بدون اتصال حقيقي بالذكاء الاصطناعي</span>
+  </header>
+
+  <main>
+    <div class="section">
+      <label class="field-label" for="lessonText">الصق نص الدرس هنا</label>
+      <div class="ocr-row">
+        <button class="ocr-btn" id="ocrBtn" type="button">
+          <span class="icon">📷</span> صوّر صفحة من الكتاب بدل الكتابة
+        </button>
+        <input type="file" id="ocrInput" accept="image/*" capture="environment" hidden>
+      </div>
+      <textarea id="lessonText" maxlength="8000" placeholder="مثال: الخلية هي الوحدة الأساسية لبناء جسم الكائن الحي، وتنقسم إلى نوعين..."></textarea>
+      <div class="char-count" id="charCount">٠ / ٨٬٠٠٠ حرف</div>
+    </div>
+
+    <div class="section">
+      <label class="field-label">المادة</label>
+      <div class="pill-row" id="subjectPills">
+        <button class="pill" data-value="arabic">اللغة العربية</button>
+        <button class="pill" data-value="english">اللغة الإنجليزية</button>
+        <button class="pill" data-value="math">الرياضيات</button>
+        <button class="pill" data-value="science">العلوم</button>
+        <button class="pill" data-value="social_studies">الدراسات الاجتماعية</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <label class="field-label">الصف الدراسي</label>
+      <div class="pill-row" id="gradePills">
+        <button class="pill" data-value="primary1">الأول الابتدائي</button>
+        <button class="pill" data-value="primary2">الثاني الابتدائي</button>
+        <button class="pill" data-value="primary3">الثالث الابتدائي</button>
+        <button class="pill" data-value="primary4">الرابع الابتدائي</button>
+        <button class="pill" data-value="primary5">الخامس الابتدائي</button>
+        <button class="pill" data-value="primary6">السادس الابتدائي</button>
+        <button class="pill" data-value="prep1">الأول الإعدادي</button>
+        <button class="pill" data-value="prep2">الثاني الإعدادي</button>
+        <button class="pill" data-value="prep3">الثالث الإعدادي</button>
+        <button class="pill" data-value="secondary1">الأول الثانوي</button>
+        <button class="pill" data-value="secondary2">الثاني الثانوي</button>
+        <button class="pill" data-value="secondary3">الثالث الثانوي</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="action-btn btn-summary" data-action="summary" disabled>
+        <span class="icon">📄</span> ملخص
+      </button>
+      <button class="action-btn btn-questions" data-action="questions" disabled>
+        <span class="icon">❓</span> أسئلة (١٠ اختيار من متعدد)
+      </button>
+      <button class="action-btn btn-flashcards" data-action="flashcards" disabled>
+        <span class="icon">🗂️</span> فلاش كاردز
+      </button>
+    </div>
+
+    <div class="usage-note">استخدمت ٣ من ١٠ محاولات اليوم</div>
+
+    <div class="result-area" id="resultArea"></div>
+  </main>
+</div>
+
+<script>
+const textarea = document.getElementById('lessonText');
+const charCount = document.getElementById('charCount');
+const subjectPills = document.getElementById('subjectPills');
+const gradePills = document.getElementById('gradePills');
+const actionBtns = document.querySelectorAll('.action-btn');
+const resultArea = document.getElementById('resultArea');
+
+let selectedSubject = null;
+let selectedGrade = null;
+
+function toArabicDigits(n){
+  const map = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+  return String(n).replace(/[0-9]/g, d => map[d]);
+}
+
+const ocrBtn = document.getElementById('ocrBtn');
+const ocrInput = document.getElementById('ocrInput');
+
+const SUBJECT_LABELS = {
+  arabic:'اللغة العربية', english:'اللغة الإنجليزية', math:'الرياضيات',
+  science:'العلوم', social_studies:'الدراسات الاجتماعية'
+};
+const GRADE_LABELS = {
+  primary1:'الأول الابتدائي', primary2:'الثاني الابتدائي', primary3:'الثالث الابتدائي',
+  primary4:'الرابع الابتدائي', primary5:'الخامس الابتدائي', primary6:'السادس الابتدائي',
+  prep1:'الأول الإعدادي', prep2:'الثاني الإعدادي', prep3:'الثالث الإعدادي',
+  secondary1:'الأول الثانوي', secondary2:'الثاني الثانوي', secondary3:'الثالث الثانوي'
+};
+
+async function callAI(messages){
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 2000,
+      messages
+    })
+  });
+  if(!response.ok) throw new Error('AI request failed: ' + response.status);
+  const data = await response.json();
+  const textBlock = data.content.find(b => b.type === 'text');
+  if(!textBlock) throw new Error('No text in AI response');
+  return textBlock.text;
+}
+
+function extractJSON(text){
+  const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+  return JSON.parse(cleaned);
+}
+
+function resizeImageToBase64(file, maxDim = 1600){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let { width, height } = img;
+      if(width > maxDim || height > maxDim){
+        const scale = maxDim / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      resolve(dataUrl.split(',')[1]);
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+function looksLikeRefusalOrJunk(text){
+  const t = text.trim();
+  if(t.length < 3) return true;
+  const badSigns = ['عذر', 'آسف', 'لا أستطيع', 'لا يمكنني', 'غير واضح', 'لا يوجد نص', 'I cannot', "I'm sorry", 'unable to'];
+  return badSigns.some(sign => t.includes(sign));
+}
+
+ocrBtn.addEventListener('click', () => ocrInput.click());
+
+ocrInput.addEventListener('change', async () => {
+  const file = ocrInput.files[0];
+  if(!file) return;
+
+  const imgUrl = URL.createObjectURL(file);
+  ocrBtn.disabled = true;
+
+  const status = document.createElement('div');
+  status.className = 'ocr-status';
+  status.innerHTML = `<span class="ocr-spinner"></span><span>جاري قراءة النص من الصورة...</span>`;
+  ocrBtn.insertAdjacentElement('afterend', status);
+
+  const preview = document.createElement('div');
+  preview.className = 'ocr-preview';
+  preview.innerHTML = `<img src="${imgUrl}">`;
+  status.insertAdjacentElement('afterend', preview);
+
+  try{
+    const base64 = await resizeImageToBase64(file);
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 2000,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: base64 } },
+            { type: "text", text: `مهمتك الوحيدة: انسخ النص العربي المكتوب في هذه الصورة حرفيًا كما هو.
+قواعد صارمة:
+- لا تكتب أي مقدمة مثل "هذا نص الصورة" أو أي تعليق.
+- لا تصف الصورة ولا تحلل محتواها.
+- لا تستخدم markdown أو علامات اقتباس.
+- إذا كانت الصورة غير واضحة تمامًا ولا يمكن قراءة أي نص منها، اكتب فقط الكلمة: تعذر
+- غير ذلك، أرجع النص المكتوب فقط وبس، سطرًا بسطر كما يظهر في الصورة.` }
+          ]
+        }]
+      })
+    });
+    if(!response.ok) throw new Error('OCR request failed: ' + response.status);
+    const data = await response.json();
+    const textBlock = data.content.find(b => b.type === 'text');
+    const extracted = textBlock ? textBlock.text.trim() : '';
+
+    if(!extracted || extracted === 'تعذر' || looksLikeRefusalOrJunk(extracted)){
+      status.innerHTML = `<span>⚠️ مقدرناش نقرأ نص واضح من الصورة دي — جرب صورة أوضح وإضاءة أحسن</span>`;
+    } else {
+      status.innerHTML = `<span>✅ تم استخراج النص بنجاح — راجعه وعدّله لو محتاج</span>`;
+      textarea.value = extracted.slice(0, 8000);
+      textarea.dispatchEvent(new Event('input'));
+    }
+  } catch(err){
+    status.innerHTML = `<span>⚠️ حصل خطأ في قراءة الصورة، حاول تاني</span>`;
+  } finally {
+    ocrBtn.disabled = false;
+    ocrInput.value = '';
+    setTimeout(() => { status.remove(); preview.remove(); }, 4500);
+  }
+});
+
+const usageNote = document.querySelector('.usage-note');
+let usedToday = 3;
+const DAILY_LIMIT = 10;
+
+function renderUsage(){
+  usageNote.textContent = `استخدمت ${toArabicDigits(usedToday)} من ${toArabicDigits(DAILY_LIMIT)} محاولات اليوم`;
+}
+renderUsage();
+
+textarea.addEventListener('input', () => {
+  const len = textarea.value.length;
+  charCount.textContent = `${toArabicDigits(len)} / ${toArabicDigits(8000)} حرف`;
+  charCount.classList.toggle('limit', len >= 8000);
+  updateButtons();
+});
+
+function setupPills(container, onSelect){
+  container.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      onSelect(pill.dataset.value);
+      updateButtons();
+    });
+  });
+}
+setupPills(subjectPills, v => selectedSubject = v);
+setupPills(gradePills, v => selectedGrade = v);
+
+function updateButtons(){
+  const ready = textarea.value.trim().length > 0 && selectedSubject && selectedGrade;
+  actionBtns.forEach(b => b.disabled = !ready);
+}
+
+const LOADING_MESSAGES = {
+  summary: 'جاري تلخيص الدرس...',
+  questions: 'جاري تجهيز الأسئلة...',
+  flashcards: 'جاري إعداد الفلاش كاردز...'
+};
+
+actionBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const action = btn.dataset.action;
+    runGeneration(action);
+  });
+});
+
+function buildPrompt(action, text, subjectLabel, gradeLabel){
+  const context = `هذه فقرة درس لطالب في الصف "${gradeLabel}" في مادة "${subjectLabel}":\n\n"""${text}"""\n\n`;
+  const varietySeed = Math.floor(Math.random() * 1000000);
+
+  if(action === 'summary'){
+    return context + 'اكتب ملخصًا واضحًا ومناسبًا لمستوى الطالب لهذه الفقرة، باللغة العربية الفصحى المبسطة، في فقرتين إلى ثلاث فقرات. اكتب الملخص فقط بدون أي مقدمة أو تعليق.';
+  }
+  if(action === 'questions'){
+    return context + `اكتب بالضبط ١٠ أسئلة اختيار من متعدد (٤ اختيارات لكل سؤال) لاختبار فهم الطالب لهذه الفقرة، باللغة العربية.
+مهم: اجعل الأسئلة وصياغتها وترتيب الاختيارات مختلفة عن أي مرة سابقة قدر الإمكان — نوّع في زاوية كل سؤال (تعريف، سبب، نتيجة، مقارنة، تطبيق) بدل تكرار نفس الصياغات. (رقم تنويع داخلي: ${varietySeed})
+أرجع الإجابة بصيغة JSON فقط بدون أي نص إضافي وبدون markdown، بالشكل التالي بالضبط:
+{"questions":[{"question":"نص السؤال","options":["أ","ب","ج","د"],"correctIndex":0}]}
+correctIndex هو رقم الاختيار الصحيح (يبدأ من صفر).`;
+  }
+  if(action === 'flashcards'){
+    return context + `اكتب مجموعة فلاش كاردز (بين ٦ و١٢ كارت حسب محتوى الفقرة) لمراجعة أهم المصطلحات والأفكار في هذه الفقرة، باللغة العربية.
+مهم: نوّع اختيار المصطلحات وصياغة الشرح عن أي مرة سابقة قدر الإمكان. (رقم تنويع داخلي: ${varietySeed})
+أرجع الإجابة بصيغة JSON فقط بدون أي نص إضافي وبدون markdown، بالشكل التالي بالضبط:
+{"flashcards":[{"front":"المصطلح أو السؤال","back":"الشرح أو الإجابة"}]}`;
+  }
+}
+
+async function runGeneration(action){
+  actionBtns.forEach(b => b.disabled = true);
+  resultArea.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>${LOADING_MESSAGES[action]}</p>
+    </div>`;
+
+  const text = textarea.value.trim();
+  const subjectLabel = SUBJECT_LABELS[selectedSubject];
+  const gradeLabel = GRADE_LABELS[selectedGrade];
+  const prompt = buildPrompt(action, text, subjectLabel, gradeLabel);
+
+  try{
+    const raw = await callAI([{ role: "user", content: prompt }]);
+
+    if(action === 'summary'){
+      renderSummary(raw.trim());
+    } else if(action === 'questions'){
+      const parsed = extractJSON(raw);
+      renderQuestions(parsed.questions);
+    } else if(action === 'flashcards'){
+      const parsed = extractJSON(raw);
+      renderFlashcards(parsed.flashcards);
+    }
+    usedToday = Math.min(usedToday + 1, DAILY_LIMIT);
+    renderUsage();
+  } catch(err){
+    resultArea.innerHTML = `<div class="error-banner">حصل خطأ أثناء التوليد، من فضلك حاول مرة أخرى بعد شوية.</div>`;
+  } finally {
+    updateButtons();
+  }
+}
+
+function renderSummary(summaryText){
+  resultArea.innerHTML = `
+    <div class="result-card">
+      <p class="result-title">الملخص</p>
+      <p class="summary-text">${summaryText.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')}</p>
+    </div>`;
+}
+
+function renderQuestions(questions){
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  card.innerHTML = `<p class="result-title">الأسئلة</p>`;
+  questions.forEach((item, qi) => {
+    const qDiv = document.createElement('div');
+    qDiv.className = 'q-item';
+    qDiv.innerHTML = `<p class="q-text">${toArabicDigits(qi+1)}. ${item.question}</p>
+      <div class="q-options"></div>`;
+    const optsDiv = qDiv.querySelector('.q-options');
+    item.options.forEach((opt, oi) => {
+      const optBtn = document.createElement('button');
+      optBtn.className = 'q-option';
+      optBtn.textContent = opt;
+      optBtn.addEventListener('click', () => {
+        optsDiv.querySelectorAll('.q-option').forEach((el, idx) => {
+          el.classList.add('disabled');
+          if(idx === item.correctIndex) el.classList.add('correct');
+          else if(idx === oi) el.classList.add('wrong');
+        });
+      });
+      optsDiv.appendChild(optBtn);
+    });
+    card.appendChild(qDiv);
+  });
+  resultArea.innerHTML = '';
+  resultArea.appendChild(card);
+}
+
+function renderFlashcards(flashcards){
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  card.innerHTML = `<p class="result-title">فلاش كاردز — اضغط على الكارت لقلبه</p>
+    <div class="flash-grid"></div>`;
+  const grid = card.querySelector('.flash-grid');
+  flashcards.forEach(fc => {
+    const outer = document.createElement('div');
+    outer.className = 'flash-card';
+    outer.innerHTML = `
+      <div class="flash-inner">
+        <div class="flash-face flash-front">${fc.front}<span class="flash-hint">اضغط للإجابة</span></div>
+        <div class="flash-face flash-back">${fc.back}</div>
+      </div>`;
+    outer.addEventListener('click', () => outer.classList.toggle('flipped'));
+    grid.appendChild(outer);
+  });
+  resultArea.innerHTML = '';
+  resultArea.appendChild(card);
+}
+</script>
+
+</body>
+</html>
